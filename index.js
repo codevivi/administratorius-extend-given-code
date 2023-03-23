@@ -4,8 +4,35 @@ import fs from "node:fs/promises";
 import { engine } from "express-handlebars";
 import session from "express-session";
 import { auth } from "./middleware/auth.js";
+import multer from "multer";
 
 const app = express();
+const uploadsDir = "./uploads";
+const storage = multer.diskStorage({
+  destination: async (req, file, next) => {
+    try {
+      await fs.access(uploadsDir);
+    } catch {
+      await fs.mkdir(uploadsDir);
+    }
+    next(null, "./uploads");
+  },
+  filename: (req, file, next) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1);
+    const nameParts = file.originalname.split(".");
+    next(null, uniqueSuffix + "." + nameParts[nameParts.length - 1]);
+  },
+});
+const upload = multer({
+  storage,
+  fileFilter: (req, file, next) => {
+    const allowed = ["image/gif", "image/jpeg", "image/png", "image/webp", "image/svg+xml"];
+    if (allowed.includes(file.mimetype)) {
+      next(null, true);
+    }
+    console.log(file.mimetype);
+  },
+});
 const file = "./database.json";
 
 // app.set('trust proxy', 1);
@@ -85,7 +112,14 @@ app.get("/new-user", auth, (req, res) => {
 });
 
 //Naujo varotojo išsaugojimas
-app.post("/new-user", auth, async (req, res) => {
+//patikrinti failo formata
+//priskirti formato pavadima, ekstensiona
+//issaugoti failo pavadinima
+app.post("/new-user", auth, upload.single("photo"), async (req, res) => {
+  console.log(req.file.path.replace("\\", "/")); //or files jeigu daugiskaita, ne single upload
+  if (req.file) {
+    req.body.photo = req.file.path.replace("\\", "/");
+  }
   try {
     let data = JSON.parse(await fs.readFile(file, "utf-8"));
 
