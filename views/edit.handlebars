@@ -1,0 +1,25 @@
+<h2>Redaguoti</h2>
+{{#if message}}
+  <div class="alert alert-danger">{{message}}</div>
+{{/if}}
+<form action="/edit-user" method="POST">
+  <input type="hidden" value="{{id}}" name="id" class="form-control" />
+  <input type="hidden" value="{{formPrefills.email}}" name="current_email" class="form-control" />
+  <div class="mb-3">
+    <label>Vardas:</label>
+    <input type="text" value="{{formPrefills.name}}" name="name" class="form-control" />
+  </div>
+  <div class="mb-3">
+    <label>Pavardė:</label>
+    <input type="text" name="last_name" value="{{formPrefills.last_name}}" class="form-control" />
+  </div>
+  <div class="mb-3">
+    <label>El. pašto adresas:</label>
+    <input type="email" name="email" value="{{formPrefills.email}}" class="form-control" />
+  </div>
+  <div class="mb-3">
+    <label>Slaptažodis:</label>
+    <input type="text" name="password" value="{{formPrefills.password}}" class="form-control" />
+  </div>
+  <button class="btn btn-primary">Edit</button>
+</form>
