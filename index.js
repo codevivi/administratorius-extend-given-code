@@ -190,4 +190,3 @@ app.get("/logout", (req, res) => {
 });
 
 app.listen(3000);
-//[{"name":"Jokubas","last_name":"Žilinskas","email":"jokubas@gmail.com","password":"12345"},{"name":"awdawd","last_name":"wadawd","email":"keistas@vardas.lt","password":"1234"},{"name":"awadwawd","last_name":"awdawdawd","email":"jokubas@gmail.com","password":"1234"},{"name":"awdawdawdawd","last_name":"awdawdwawd","email":"awdawdawdawd@gmail.com","password":"awdawdawdawd"}]
