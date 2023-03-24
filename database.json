@@ -1,1 +1,6 @@
-[{"name":"Keistas","last_name":"Vardenis","email":"keistas@vardas.lt","password":"1234"},{"name":"Katinas","last_name":"Katiniauskas","email":"katinas@cat.cat","password":"katinas"},{"name":"asdf","last_name":"d","email":"ddd@dd.com","password":"d","photo":"uploads/1679590811384-1.png"},{"name":"agurkiukas","last_name":"agurkas","email":"bla@bla.lba.com","password":"bla","photo":"uploads/1679590958222-0.png"}]
+[
+  { "name": "Keistas", "last_name": "Vardenis", "email": "keistas@vardas.lt", "password": "1234" },
+  { "name": "Katinas", "last_name": "Katiniauskas", "email": "katinas@cat.cat", "password": "katinas" },
+  { "name": "dudulis", "last_name": "duduliauskas", "email": "d@d.com", "password": "d" },
+  { "name": "agurkiukas", "last_name": "agurkiauskas", "email": "agu@agu.com", "password": "bla" }
+]

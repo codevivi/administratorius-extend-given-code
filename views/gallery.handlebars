@@ -1,4 +1,7 @@
 <h1>Konkurse dalyvaujančios nuotraukos</h1>
+{{#if message}}
+  <p class="alert alert-danger">{{message}}</p>
+{{/if}}
 <div class="row pt-5">
   {{#each data}}
     <div class="col-4 py-3">

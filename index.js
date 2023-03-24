@@ -227,7 +227,10 @@ app.get("/gallery", auth, async (req, res) => {
       galleryData[i].totalRating = (sum / galleryData[i].ratings.length).toFixed(2);
     }
   }
-  res.render("gallery", { data: galleryData, user: req.session.user });
+  galleryData.sort((currentPicture, nextPicture) => {
+    return nextPicture.totalRating - currentPicture.totalRating;
+  });
+  res.render("gallery", { data: galleryData, user: req.session.user, message: req.session.message });
   delete req.session.message;
 });
 
