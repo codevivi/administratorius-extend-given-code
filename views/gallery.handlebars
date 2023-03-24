@@ -11,19 +11,24 @@
             <div class="rating">Įvertinimas: {{totalRating}}</div>
           {{/if}}
         </div>
-        <div class="rating">
-          <form action="/gallery/{{@key}}" method="POST" class="input-group">
-            {{!-- <input type="hidden" name="id" value="{{@key}}" /> --}}
-            <select name="rating" class="form-control">
-              <option value="5">5 *</option>
-              <option value="4">4 *</option>
-              <option value="3">3 *</option>
-              <option value="2">2 *</option>
-              <option value="1">1 *</option>
-            </select>
-            <button class="btn btn-primary">Vertinti</button>
-          </form>
-        </div>
+        {{#unless alreadyRated}}
+          <div class="rating">
+            <form action="/gallery/{{@key}}" method="POST" class="input-group">
+              {{!-- <input type="hidden" name="id" value="{{@key}}" /> --}}
+              <select name="rating" class="form-control">
+                <option value="5">5 *</option>
+                <option value="4">4 *</option>
+                <option value="3">3 *</option>
+                <option value="2">2 *</option>
+                <option value="1">1 *</option>
+              </select>
+              <button class="btn btn-primary">Vertinti</button>
+            </form>
+          </div>
+        {{/unless}}
+        {{#if alreadyRated}}
+          <div class="rating">{{alreadyRated}}</div>
+        {{/if}}
       </div>
     </div>
   {{/each}}

@@ -216,12 +216,18 @@ app.get("/gallery", auth, async (req, res) => {
     galleryData[i].userInfo = userInfo;
 
     if (galleryData[i].ratings) {
+      let alreadyRated = galleryData[i].ratings.find((rating) => {
+        return rating.userId === req.session.user.id;
+      });
+      if (alreadyRated) {
+        galleryData[i].alreadyRated = alreadyRated.rating;
+      }
+
       const sum = galleryData[i].ratings.reduce((prev, current) => prev + current.rating, 0);
       galleryData[i].totalRating = (sum / galleryData[i].ratings.length).toFixed(2);
     }
   }
-
-  res.render("gallery", { data: galleryData, user: req.session.user, message: req.session.message });
+  res.render("gallery", { data: galleryData, user: req.session.user });
   delete req.session.message;
 });
 
@@ -236,6 +242,13 @@ app.post("/gallery/:id", auth, async (req, res) => {
   if (!galleryData[req.params.id].ratings) {
     galleryData[req.params.id].ratings = [ratingData];
   } else {
+    const alreadyRated = galleryData[req.params.id].ratings.find((rating) => {
+      return rating.userId === req.session.user.id;
+    });
+    if (alreadyRated) {
+      req.session.message = `Jau ivertinote: ${alreadyRated.rating}`;
+      return res.redirect("/gallery");
+    }
     galleryData[req.params.id].ratings.push(ratingData);
   }
 
