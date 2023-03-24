@@ -5,7 +5,7 @@
   "main": "index.js",
   "private": "true",
   "scripts": {
-    "start": "nodemon . --ignore database.json"
+    "start": "nodemon . --ignore database.json --ignore gallery.json --ignore ./uploads"
   },
   "keywords": [],
   "author": "",

@@ -8,6 +8,8 @@ import multer from "multer";
 
 const app = express();
 const uploadsDir = "./uploads";
+const file = "./database.json";
+const gallery = "./gallery.json";
 const storage = multer.diskStorage({
   destination: async (req, file, next) => {
     try {
@@ -18,7 +20,7 @@ const storage = multer.diskStorage({
     next(null, "./uploads");
   },
   filename: (req, file, next) => {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1);
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9); //1e9-one billion
     const nameParts = file.originalname.split(".");
     next(null, uniqueSuffix + "." + nameParts[nameParts.length - 1]);
   },
@@ -30,10 +32,8 @@ const upload = multer({
     if (allowed.includes(file.mimetype)) {
       next(null, true);
     }
-    console.log(file.mimetype);
   },
 });
-const file = "./database.json";
 
 // app.set('trust proxy', 1);
 
@@ -42,7 +42,7 @@ app.use(
   session({
     secret: "LABAI SLAPTA FRAZĖ",
     resave: false,
-    saveUninitialized: false,
+    saveUninitialized: true,
     cookie: { secure: false },
   })
 );
@@ -53,6 +53,8 @@ app.use(
     extended: true,
   })
 );
+
+app.use("/uploads", express.static("./uploads"));
 
 //handlebars konfigūracija
 app.engine("handlebars", engine());
@@ -68,15 +70,15 @@ app.get("/login", (req, res) => {
 app.post("/login", async (req, res) => {
   let data = JSON.parse(await fs.readFile(file, "utf-8"));
 
-  data = data.filter((user) => user.email === req.body.email && user.password === req.body.password);
-  if (data.length > 0) {
+  const index = data.findIndex((user) => user.email === req.body.email && user.password === req.body.password);
+  if (index != -1) {
     req.session.loggedIn = true;
     req.session.user = {
-      name: data[0].name,
-      last_name: data[0].last_name,
-      email: data[0].email,
+      id: index,
+      name: data[index].name,
+      last_name: data[index].last_name,
+      email: data[index].email,
     };
-    data[0].user;
     return res.redirect("/");
   }
 
@@ -112,13 +114,9 @@ app.get("/new-user", auth, (req, res) => {
 });
 
 //Naujo varotojo išsaugojimas
-//patikrinti failo formata
-//priskirti formato pavadima, ekstensiona
-//issaugoti failo pavadinima
 app.post("/new-user", auth, upload.single("photo"), async (req, res) => {
-  console.log(req.file.path.replace("\\", "/")); //or files jeigu daugiskaita, ne single upload
   if (req.file) {
-    req.body.photo = req.file.path.replace("\\", "/");
+    req.body.photo = req.file.path.replace("\\", "/"); //files jeigu daugiskaita, ne single upload
   }
   try {
     let data = JSON.parse(await fs.readFile(file, "utf-8"));
@@ -139,7 +137,6 @@ app.post("/new-user", auth, upload.single("photo"), async (req, res) => {
 
 app.get("/delete-user/:id", auth, async (req, res) => {
   const data = JSON.parse(await fs.readFile(file, "utf8"));
-  ///cia padariau is pradziu kad neleistu istrinti , bet paskui padariau kad net nerodytu mygtuko istrynimo, tai sitas kaip ir nebereikalingas gal..
   if (req.session.user.email === data[req.params.id].email) {
     req.session.message = "Deja negalite ištrinti saves, kreipkitės i kita admiministratorių";
     return res.redirect("/");
@@ -150,6 +147,7 @@ app.get("/delete-user/:id", auth, async (req, res) => {
 
   res.redirect("/");
 });
+
 app.get("/edit-user/:id", auth, async (req, res) => {
   const data = JSON.parse(await fs.readFile(file, "utf8"));
   let user = data[req.params.id];
@@ -157,7 +155,7 @@ app.get("/edit-user/:id", auth, async (req, res) => {
   let formPrefills = req.session.formPrefills;
   delete req.session.message;
   delete req.session.formPrefills;
-  res.render("edit", { formPrefills: formPrefills || user, id: req.params.id, message });
+  res.render("edit", { formPrefills: formPrefills || user, user, id: req.params.id, message });
 });
 
 app.post("/edit-user", auth, async (req, res) => {
@@ -169,12 +167,12 @@ app.post("/edit-user", auth, async (req, res) => {
   let password = req.body.password;
   let user = { name, last_name, email, password };
   if (email !== current_email) {
-    //reiskia email nekaiciamas ir jei ziuretume ar toks egzistuoja, jis egzistuotu
+    //Tikrinti ti tuo atveju, jei email reiksmes nebuvo bandoma pakeisti, nes jei ziuretume ar toks egzistuoja, jis egzistuotu
     let alreadyExists = data.find((user) => user.email === email);
     if (alreadyExists) {
       req.session.message = "Vartotojas su tokiu elektroninio pasto adresu, jau egzituoja.";
       req.session.formPrefills = { name, last_name, email: current_email, password };
-      return res.redirect(`/edit-user/${req.body.id}`); //forma resetinasi..nelabai gerai.. nezinau kaip uzpilyd per redirekta..
+      return res.redirect(`/edit-user/${req.body.id}`);
     }
   }
   data[req.body.id] = user;
@@ -184,6 +182,68 @@ app.post("/edit-user", auth, async (req, res) => {
   }
   res.redirect("/");
 });
+
+app.get("/new-photo", auth, (req, res) => {
+  res.render("newphoto", { user: req.session.user, message: req.session.message });
+  delete req.session.message;
+});
+
+app.post("/new-photo", auth, upload.single("photo"), async (req, res) => {
+  if (req.file) req.body.photo = req.file.path.replace("\\", "/");
+
+  // const users = JSON.parse(await fs.readFile(file, 'utf-8'));
+  // req.body.userId = users.findIndex(user => user.email === req.session.user.email);
+  req.body.userId = req.session.user.id;
+
+  try {
+    let data = JSON.parse(await fs.readFile(gallery, "utf-8"));
+
+    data.push(req.body);
+    await fs.writeFile(gallery, JSON.stringify(data));
+  } catch {
+    await fs.writeFile(gallery, JSON.stringify([req.body]));
+  }
+
+  res.redirect("/");
+});
+
+app.get("/gallery", auth, async (req, res) => {
+  const galleryData = JSON.parse(await fs.readFile(gallery, "utf-8"));
+  const userData = JSON.parse(await fs.readFile(file, "utf-8"));
+
+  for (const i in galleryData) {
+    const userInfo = userData[galleryData[i].userId];
+    galleryData[i].userInfo = userInfo;
+
+    if (galleryData[i].ratings) {
+      const sum = galleryData[i].ratings.reduce((prev, current) => prev + current.rating, 0);
+      galleryData[i].totalRating = (sum / galleryData[i].ratings.length).toFixed(2);
+    }
+  }
+
+  res.render("gallery", { data: galleryData, user: req.session.user, message: req.session.message });
+  delete req.session.message;
+});
+
+app.post("/gallery/:id", auth, async (req, res) => {
+  // req.params.id
+  const galleryData = JSON.parse(await fs.readFile(gallery, "utf-8"));
+  const ratingData = {
+    rating: +req.body.rating,
+    userId: req.session.user.id,
+  };
+
+  if (!galleryData[req.params.id].ratings) {
+    galleryData[req.params.id].ratings = [ratingData];
+  } else {
+    galleryData[req.params.id].ratings.push(ratingData);
+  }
+
+  await fs.writeFile(gallery, JSON.stringify(galleryData));
+
+  res.redirect("/gallery");
+});
+
 app.get("/logout", (req, res) => {
   req.session.destroy();
   res.redirect("/login");

@@ -1,0 +1,30 @@
+<h1>Konkurse dalyvaujančios nuotraukos</h1>
+<div class="row pt-5">
+  {{#each data}}
+    <div class="col-4 py-3">
+      <img src="/{{photo}}" alt="{{name}}" />
+      <div class="d-flex justify-content-between align-items-center">
+        <div class="info">
+          <h5 class="mt-2">{{name}}</h5>
+          <div class="author">{{userInfo.name}} {{userInfo.last_name}}</div>
+          {{#if totalRating}}
+            <div class="rating">Įvertinimas: {{totalRating}}</div>
+          {{/if}}
+        </div>
+        <div class="rating">
+          <form action="/gallery/{{@key}}" method="POST" class="input-group">
+            {{!-- <input type="hidden" name="id" value="{{@key}}" /> --}}
+            <select name="rating" class="form-control">
+              <option value="5">5 *</option>
+              <option value="4">4 *</option>
+              <option value="3">3 *</option>
+              <option value="2">2 *</option>
+              <option value="1">1 *</option>
+            </select>
+            <button class="btn btn-primary">Vertinti</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  {{/each}}
+</div>

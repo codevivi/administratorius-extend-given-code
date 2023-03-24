@@ -16,13 +16,17 @@
       <div class="d-flex justify-content-center">
         <ul class="nav nav-pills">
           <li class="nav-item"><a href="/" class="nav-link active" aria-current="page">Titulinis</a></li>
-          <li class="nav-item"><a href="/new-user" class="nav-link">Naujas vartotojas</a></li>
           {{#if user}}
+            <li class="nav-item"><a href="/new-user" class="nav-link">Naujas vartotojas</a></li>
+            <li class="nav-item"><a href="/new-photo" class="nav-link">Nauja konkurso nuotrauka</a></li>
+            <li class="nav-item"><a href="/gallery" class="nav-link">Konkursas</a></li>
             <li class="nav-item"><a href="/logout" class="nav-link">Atsijungti</a></li>
           {{/if}}
         </ul>
       </div>
-      <div class="text-center pt-3">Sveiki, <strong>{{user.name}} {{user.last_name}}</strong></div>
+      {{#if user}}
+        <div class="text-center pt-3">Sveiki, <strong>{{user.name}} {{user.last_name}}</strong></div>
+      {{/if}}
     </header>
     <div class="container">
       {{{body}}}
