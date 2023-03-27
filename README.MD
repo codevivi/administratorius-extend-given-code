@@ -46,3 +46,5 @@
    ```sh
    npm start
    ```
+
+4. default login: keistas@vardas.lt, 1234
